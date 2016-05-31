@@ -112,5 +112,3 @@ instance Sat Bool where sat = id
 -- | any members of the enumeration can satisfy the produced object. This is incredibly inefficient
 -- | and should not be used on large spaces if you expect it to take a long time to find a solution.
 instance (Enumerable e, Sat s) => Sat (e -> s) where sat f = or (map (sat . f) (enumeration :: [e]))
-
-
