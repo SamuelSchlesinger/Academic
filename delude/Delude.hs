@@ -36,12 +36,15 @@ instance Boolish Bool where
     true = True
     false = False
 
+-- | Abstracts over an expression.
 lambda :: b -> (a -> b)
 lambda b = \a -> b
 
+-- | I really don't quite now how to describe this in words yet.
 liftf1 :: (b -> b) -> (a -> b) -> (a -> b)
 liftf1 op f = \x -> op (f x)
 
+-- | Same as liftf1... Seems like a pretty general thing for inductive definitions.
 liftf2 :: (b -> b -> b) -> (a -> b) -> (a -> b) -> (a -> b)
 liftf2 op f g = \x -> (f x) `op` (g x)
 
