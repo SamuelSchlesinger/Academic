@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, FlexibleInstances, UndecidableInstances, ScopedTypeVariables #-}
 
 module Delude
   (
@@ -11,6 +11,7 @@ import Prelude hiding ((||), (&&), (^), iff, implies, not)
 class Boolish b where
     (||), (&&), (^), iff, implies :: b -> b -> b
     not      :: b -> b
+    true, false :: b
 
 instance Boolish Bool where
     False || False = False
@@ -27,6 +28,8 @@ instance Boolish Bool where
     _ `implies` _ = True
     not True = False
     not False = True
+    true = True
+    false = False
 
 instance (Boolish b) => Boolish (x -> b) where
     f || g = \x -> (f x) || (g x)
@@ -35,7 +38,8 @@ instance (Boolish b) => Boolish (x -> b) where
     f `iff` g = \x -> (f x) `iff` (g x)
     f `implies` g = \x -> (f x) `implies` (g x)
     not f = \x -> not (f x)
-
+    true = \x -> true
+    false = \x -> false
 
 instance (Num n) => Num (a -> n) where
     a + b = \x -> a x + b x
@@ -69,4 +73,8 @@ instance (Floating f) => Floating (a -> f) where
     tanh f = \x -> tanh (f x)
     asinh f = \x -> asinh (f x)
     acosh f = \x -> acosh (f x)
-    atanh f = \x -> atanh (f x) 
+    atanh f = \x -> atanh (f x)
+
+class Enumerable e where enumeration :: [e]
+
+instance (Bounded e, Enum e) => Enumerable e where enumeration = [minBound..maxBound]
