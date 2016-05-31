@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, NoImplicitPrelude, ScopedTypeVariables #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Delude
   (

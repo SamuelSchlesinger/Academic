@@ -54,7 +54,7 @@ library
   -- other-modules:       
   
   -- LANGUAGE extensions used by modules in this package.
-  other-extensions:    TypeFamilies, NoImplicitPrelude, ScopedTypeVariables
+  other-extensions:    NoImplicitPrelude
   
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.8 && <4.9
