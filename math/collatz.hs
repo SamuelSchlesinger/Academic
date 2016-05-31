@@ -4,16 +4,21 @@ import Delude hiding (iterate, map, takeWhile)
 import Data.Stream
 
 f :: Integer -> Integer
-f x = if x `mod` 2 == 0 then x `quot` 2 else x * 3 + 1
+f x = case x `mod` 2 of
+          0 -> x `quot` 2
+          1 -> x * 3 + 1 
 
-collatz :: Integer -> Stream Integer
-collatz n = iterate f n
+collatzOf :: Integer -> Stream Integer
+collatzOf n = iterate f n
 
-allCollatz :: Stream (Stream Integer)
-allCollatz = map collatz $ iterate (+1) 1
+naturals :: Stream Integer
+naturals = iterate (+1) 1
 
-allCollatzTil1 :: Stream [Integer]
-allCollatzTil1 = map (takeWhile (/= 1)) allCollatz
+collatz :: Stream (Stream Integer)
+collatz = map collatzOf naturals
 
-allCollatzTil1Lengths :: Stream Int
-allCollatzTil1Lengths = map length allCollatzTil1
+collatz_until1 :: Stream [Integer]
+collatz_until1 = map (takeWhile (/= 1)) collatz
+
+collatz_lengths :: Stream Int
+collatz_lengths = map length collatz_until1
