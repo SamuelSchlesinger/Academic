@@ -13,10 +13,11 @@ name:                delude
 version:             0.1.0.0
 
 -- A short (one-line) description of the package.
-synopsis:            Generalized pieces of the numerical hierarchy to allow functions to be operated on in intuitive ways for a student of maths. Also generalized Bool in the same way in a typeclass called Boolish.
+synopsis:            Generalized the Prelude more functionally.
 
 -- A longer description of the package.
 -- description:         
+description:         Generalized Prelude 
 
 -- The license under which the package is released.
 license:             MIT
@@ -35,6 +36,7 @@ maintainer:          sgschlesinger@gmail.com
 -- copyright:           
 
 -- category:            
+category:            Distribution
 
 build-type:          Simple
 
