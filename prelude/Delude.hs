@@ -4,19 +4,12 @@
 module Delude where
 
 import Prelude hiding ((||), (&&), (^), iff, implies, not)
-import qualified Data.IntMap as IntMap
 
--- | A more general logical interface named after the
--- | great man George Boole
-class GeorgeLike b where
-    (||)     :: b -> b -> b
-    (&&)     :: b -> b -> b
-    (^)      :: b -> b -> b
-    iff      :: b -> b -> b
-    implies  :: b -> b -> b
+class Boolish b where
+    (||), (&&), (^), iff, implies :: b -> b -> b
     not      :: b -> b
 
-instance GeorgeLike Bool where
+instance Boolish Bool where
     False || False = False
     _     || _     = True
     True  && True  = True
@@ -32,7 +25,7 @@ instance GeorgeLike Bool where
     not True = False
     not False = True
 
-instance (GeorgeLike b) => GeorgeLike (x -> b) where
+instance (Boolish b) => Boolish (x -> b) where
     f || g = \x -> (f x) || (g x)
     f && g = \x -> (f x) && (g x)
     f ^  g = \x -> (f x) ^  (g x)
@@ -40,4 +33,11 @@ instance (GeorgeLike b) => GeorgeLike (x -> b) where
     f `implies` g = \x -> (f x) `implies` (g x)
     not f = \x -> not (f x)
 
-
+instance (Num n) => Num (a -> n) where
+    a + b = \x -> a x + b x
+    a - b = \x -> a x - b x
+    a * b = \x -> a x * b x
+    negate f = \x -> negate (f x)
+    abs f = \x -> abs (f x)
+    signum f = \x -> signum (f x)
+    fromInteger n = \x -> (fromInteger n)
