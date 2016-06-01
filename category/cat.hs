@@ -5,12 +5,12 @@ class Arr arr where
   f <. g = g >. f
 
 class (Arr arr) => Cat arr where
-  _id :: a -> arr a a -- identity arrow
+  _id :: arr a a -- identity arrow
 
 instance Arr (->) where
   f <. g = \x -> f (g x)
 
 instance Cat (->) where
-  _id a = id
+  _id = id
 
 
