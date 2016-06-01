@@ -8,7 +8,6 @@ module Delude
   , module Data.Foldable
   , liftf1, liftf2
   , Enumerable(..)
-  , Sat(..)
   ) where
 
 import Control.Monad
@@ -106,16 +105,7 @@ class Arr arr where
     f >. g = g .< f
     f .< g = g >. f
 
--- | More general Category class than defined in 
-class (Arr arr) => Cat arr where
-    idmap :: a -> arr a a
-
 instance Arr (->) where (.<) = (.)
-
-instance Cat (->) where idmap a = id
 
 -- | A class which supplies you with a (possibly infinite) enumeration of all of the types which instantiate it.
 class Enumerable e where enumeration :: [e]
-
--- | Bounded e, Enum e gives us a natural way to enumerate e, where enumeration = [minBound..maxBound]
-instance (Bounded e, Enum e) => Enumerable e where enumeration = [minBound..maxBound]
