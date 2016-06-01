@@ -5,11 +5,13 @@ module Delude
     Boolish(..)
   , module Prelude
   , module Control.Monad
+  , module Control.Applicative
   , module Data.Foldable
   , liftf1, liftf2
   , Enumerable(..)
   ) where
 
+import Control.Applicative
 import Control.Monad
 import Data.Foldable
 import Prelude hiding ((||), (&&), (^), iff, implies, not, elem)
@@ -41,11 +43,11 @@ instance Boolish Bool where
 
 -- | I really don't quite now how to describe this in words yet.
 liftf1 :: (b -> b) -> (a -> b) -> (a -> b)
-liftf1 op f = \x -> op (f x)
+liftf1 = (.)
 
 -- | Same as liftf1... Seems like a pretty general thing for inductive definitions.
 liftf2 :: (b -> b -> b) -> (a -> b) -> (a -> b) -> (a -> b)
-liftf2 op f g = \x -> f x `op` g x
+liftf2 op f g x = f x `op` g x
 
 -- | Functions which return Boolish things are also rather Boolish,
 -- | as you can just lift the functions of the Boolish below up a level
