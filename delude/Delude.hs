@@ -4,12 +4,16 @@ module Delude
   (
     Boolish(..)
   , module Prelude
-  , liftf1, liftf2, lambda
+  , module Control.Monad
+  , module Data.Foldable
+  , liftf1, liftf2
   , Enumerable(..)
   , Sat(..)
   ) where
 
-import Prelude hiding ((||), (&&), (^), iff, implies, not)
+import Control.Monad
+import Data.Foldable
+import Prelude hiding ((||), (&&), (^), iff, implies, not, elem)
 
 -- | Boolish things are things which you can do boolean operations on.
 class Boolish b where
@@ -36,17 +40,13 @@ instance Boolish Bool where
     true = True
     false = False
 
--- | Abstracts over an expression.
-lambda :: b -> (a -> b)
-lambda b = \a -> b
-
 -- | I really don't quite now how to describe this in words yet.
 liftf1 :: (b -> b) -> (a -> b) -> (a -> b)
 liftf1 op f = \x -> op (f x)
 
 -- | Same as liftf1... Seems like a pretty general thing for inductive definitions.
 liftf2 :: (b -> b -> b) -> (a -> b) -> (a -> b) -> (a -> b)
-liftf2 op f g = \x -> (f x) `op` (g x)
+liftf2 op f g = \x -> f x `op` g x
 
 -- | Functions which return Boolish things are also rather Boolish,
 -- | as you can just lift the functions of the Boolish below up a level
@@ -58,8 +58,8 @@ instance (Boolish b) => Boolish (x -> b) where
     iff = liftf2 iff
     implies = liftf2 implies
     not = liftf1 not
-    true = lambda true
-    false = lambda false
+    true = const true
+    false = const false
 
 -- | The same thing that is done to Boolish things, this lifting
 -- | of abstractions, can be done for Num instances.
@@ -70,13 +70,13 @@ instance (Num n) => Num (a -> n) where
     negate = liftf1 negate
     abs = liftf1 abs
     signum = liftf1 signum
-    fromInteger n = lambda (fromInteger n)
+    fromInteger n = const (fromInteger n)
 
 -- | The same applies for Fractional things as Boolish and Num.
 instance (Fractional f) => Fractional (a -> f) where
     (/) = liftf2 (/)
     recip = liftf1 recip
-    fromRational n = lambda (fromRational n)
+    fromRational n = const (fromRational n)
 
 -- | Finally, I've lifted the Floating interface.
 instance (Floating f) => Floating (a -> f) where
@@ -99,19 +99,23 @@ instance (Floating f) => Floating (a -> f) where
     acosh = liftf1 acosh
     atanh = liftf1 atanh
 
+-- | Composable things
+class Arr arr where
+    (.<) :: arr b c -> arr a b -> arr a c
+    (>.) :: arr a b -> arr b c -> arr a c
+    f >. g = g .< f
+    f .< g = g >. f
+
+-- | More general Category class than defined in 
+class (Arr arr) => Cat arr where
+    idmap :: a -> arr a a
+
+instance Arr (->) where (.<) = (.)
+
+instance Cat (->) where idmap a = id
+
 -- | A class which supplies you with a (possibly infinite) enumeration of all of the types which instantiate it.
 class Enumerable e where enumeration :: [e]
 
 -- | Bounded e, Enum e gives us a natural way to enumerate e, where enumeration = [minBound..maxBound]
 instance (Bounded e, Enum e) => Enumerable e where enumeration = [minBound..maxBound]
-
--- | Gives the user a function which will return whether or not the construction is "satisfiable".
-class Sat s where sat :: s -> Bool
-
--- | True is satisfiable, False is not.
-instance Sat Bool where sat = id
-
--- | A function from some enumerable set to some s with sat defined on it is defined to be whether
--- | any members of the enumeration can satisfy the produced object. This is incredibly inefficient
--- | and should not be used on large spaces if you expect it to take a long time to find a solution.
-instance (Enumerable e, Sat s) => Sat (e -> s) where sat f = or (map (sat . f) (enumeration :: [e]))
