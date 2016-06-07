@@ -6,15 +6,19 @@ module Delude
   , module Prelude
   , module Control.Monad
   , module Control.Applicative
+  , module Data.Functor
   , module Data.Foldable
   , liftf1, liftf2
   , Enumerable(..)
+  , Stream(..)
   ) where
 
+import Data.Functor
 import Control.Applicative
 import Control.Monad
+import Control.Comonad
 import Data.Foldable
-import Prelude hiding ((||), (&&), (^), iff, implies, not, elem)
+import Prelude hiding ((||), (&&), (^), iff, implies, not, elem, iterate)
 
 -- | Boolish things are things which you can do boolean operations on.
 class Boolish b where
@@ -41,13 +45,24 @@ instance Boolish Bool where
     true = True
     false = False
 
--- | I really don't quite now how to describe this in words yet.
+---------------------------------------------------------------------
+ 
 liftf1 :: (b -> b) -> (a -> b) -> (a -> b)
 liftf1 = (.)
 
--- | Same as liftf1... Seems like a pretty general thing for inductive definitions.
 liftf2 :: (b -> b -> b) -> (a -> b) -> (a -> b) -> (a -> b)
 liftf2 op f g x = f x `op` g x
+
+{-class Mapf m where mapf :: m (a -> b) -> a -> m b
+
+instance Mapf [] where 
+    mapf [] a = []
+    mapf (f:fs) a = f a : (mapf fs a)
+
+liftfN :: (b -> b -> b) -> [a -> b] -> a -> b
+liftfN op (f:g:fs) = liftfN op ((liftf2 op f g):fs)
+
+------------------------------------------------------------------------ -}
 
 -- | Functions which return Boolish things are also rather Boolish,
 -- | as you can just lift the functions of the Boolish below up a level
@@ -111,3 +126,77 @@ instance Arr (->) where (.<) = (.)
 
 -- | A class which supplies you with a (possibly infinite) enumeration of all of the types which instantiate it.
 class Enumerable e where enumeration :: [e]
+
+class Iterable s where iterate :: (i -> i) -> i -> s i
+
+instance Iterable [] where iterate f x = x : (iterate f (f x))
+
+instance Iterable Stream where iterate f x = Cons x (iterate f (f x))
+
+instance (Num a, Num b) => Num (a, b) where
+    (a, b) + (c, d) = (a + c, b + d)
+    (a, b) * (c, d) = (a * c, b * d)
+    (a, b) - (c, d) = (a - c, b - d)
+    negate (a, b) = (negate a, negate b)
+    abs (a, b) = (abs a, abs b)
+    signum (a, b) = (signum a, signum b)
+    fromInteger n = (fromInteger n, fromInteger n)
+
+instance (Fractional a, Floating b) => Fractional (a, b) where
+    (a, b) / (c, d) = (a / c, b / d)
+    recip (a, b) = (recip a, recip b)
+    fromRational n = (fromRational n, fromRational n)
+
+instance (Floating a, Floating b) => Floating (a, b) where
+    pi = (pi, pi)
+    exp (a, b) = (exp a, exp b)
+    log (a, b) = (log a, log b)
+    sqrt (a, b) = (sqrt a, sqrt b)
+    (a, b) ** (c, d) = (a ** c, b ** d)
+    logBase (a, b) (c, d) = (logBase a c, logBase b d)
+    sin (a, b) = (sin a, sin b)
+    cos (a, b) = (cos a, cos b)
+    tan (a, b) = (tan a, tan b)
+    asin (a, b) = (asin a, asin b)
+    acos (a, b) = (acos a, acos b)
+    atan (a, b) = (atan a, atan b)
+    sinh (a, b) = (sinh a, sinh b)
+    cosh (a, b) = (cosh a, cosh b) 
+    tanh (a, b) = (tanh a, tanh b)
+    asinh (a, b) = (asinh a, asinh b)
+    acosh (a, b) = (acosh a, acosh b)
+    atanh (a, b) = (atanh a, atanh b)
+
+instance (Num a, Num b, Num c) => Num (a, b, c) where
+    (a, b, c) + (d, e, f) = (a + d, b + e, c + f)
+    (a, b, c) * (d, e, f) = (a * d, b * e, c * f)
+    (a, b, c) - (d, e, f) = (a - d, b - e, c - f)
+    negate (a, b, c) = (negate a, negate b, negate c)
+    abs (a, b, c) = (abs a, abs b, abs c)
+    signum (a, b, c) = (signum a, signum b, signum c)
+    fromInteger n = (fromInteger n, fromInteger n, fromInteger n)    
+
+instance (Fractional a, Fractional b, Fractional c) => Fractional (a, b, c) where
+    (a, b, c) / (e, f, g) = (a / e, b / f, c / g)
+    recip (a, b, c) = (recip a, recip b, recip c)
+    fromRational n = (fromRational n, fromRational n, fromRational n)
+
+instance (Floating a, Floating b, Floating c) => Floating (a, b, c) where
+    pi = (pi, pi, pi)
+    exp (a, b, c) = (exp a, exp b, exp c)
+    log (a, b, c) = (log a, log b, log c)
+    sqrt (a, b, c) = (sqrt a, sqrt b, sqrt c)
+    (a, b, e) ** (c, d, f) = (a ** c, b ** d, e ** f)
+    logBase (a, b, e) (c, d, f) = (logBase a c, logBase b d, logBase e f)
+    sin (a, b, c) = (sin a, sin b, sin c)
+    cos (a, b, c) = (cos a, cos b, cos c)
+    tan (a, b, c) = (tan a, tan b, tan c)
+    asin (a, b, c) = (asin a, asin b, asin c)
+    acos (a, b, c) = (acos a, acos b, acos c)
+    atan (a, b, c) = (atan a, atan b, atan c)
+    sinh (a, b, c) = (sinh a, sinh b, sinh c)
+    cosh (a, b, c) = (cosh a, cosh b, cosh c) 
+    tanh (a, b, c) = (tanh a, tanh b, tanh c)
+    asinh (a, b, c) = (asinh a, asinh b, asinh c)
+    acosh (a, b, c) = (acosh a, acosh b, acosh c)
+    atanh (a, b, c) = (atanh a, atanh b, atanh c)
