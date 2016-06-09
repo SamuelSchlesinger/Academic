@@ -8,7 +8,6 @@ module Delude
   , module Control.Applicative
   , module Data.Functor
   , module Data.Foldable
-  , liftf1, liftf2
   , Enumerable(..)
   , Stream(..)
   ) where
@@ -19,6 +18,8 @@ import Control.Monad
 import Control.Comonad
 import Data.Foldable
 import Prelude hiding ((||), (&&), (^), iff, implies, not, elem, iterate)
+
+data Stream a = Cons a (Stream a)
 
 -- | Boolish things are things which you can do boolean operations on.
 class Boolish b where
@@ -48,10 +49,10 @@ instance Boolish Bool where
 ---------------------------------------------------------------------
  
 liftf1 :: (b -> b) -> (a -> b) -> (a -> b)
-liftf1 = (.)
+liftf1 = liftM
 
 liftf2 :: (b -> b -> b) -> (a -> b) -> (a -> b) -> (a -> b)
-liftf2 op f g x = f x `op` g x
+liftf2 = liftM2
 
 {-class Mapf m where mapf :: m (a -> b) -> a -> m b
 
